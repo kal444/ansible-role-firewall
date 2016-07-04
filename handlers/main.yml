@@ -1,2 +1,7 @@
 ---
 # handlers file for ansible-role-firewall
+- name: restart firewall
+  service: name=firewall state=restarted
+
+- name: restart firewall_ipv6
+  service: name=firewall_ipv6 state=restarted

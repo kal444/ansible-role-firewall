@@ -1,2 +1,34 @@
 ---
 # tasks file for ansible-role-firewall
+- name: Ensure iptables is installed (Debian).
+  apt: pkg=iptables state=present
+  when: ansible_os_family == 'Debian'
+
+- name: Ensure iptables is installed (RedHat).
+  yum: pkg=iptables state=present
+  when: ansible_os_family == 'RedHat'
+
+- name: Copy firewall init script into place.
+  template: src=etc/init.d/firewall.j2 dest=/etc/init.d/firewall owner=root group=root mode=0755
+  notify: restart firewall
+
+- name: Copy firewall rules into place.
+  template: src=etc/firewall-rules.bash.j2 dest=/etc/firewall-rules.bash owner=root group=root mode=0744
+  notify: restart firewall
+
+- name: Ensure the firewall is enabled and will start on boot.
+  service: name=firewall state=started enabled=yes
+
+- name: Copy firewall_ipv6 init script into place.
+  template: src=etc/init.d/firewall_ipv6.j2 dest=/etc/init.d/firewall_ipv6 owner=root group=root mode=0755
+  notify: restart firewall_ipv6
+  when: firewall_ipv6_enabled
+
+- name: Copy firewall_ipv6 rules into place.
+  template: src=etc/firewall_ipv6-rules.bash.j2 dest=/etc/firewall_ipv6-rules.bash owner=root group=root mode=0744
+  notify: restart firewall_ipv6
+  when: firewall_ipv6_enabled
+
+- name: Ensure the firewall_ipv6 is enabled and will start on boot.
+  service: name=firewall_ipv6 state=started enabled=yes
+  when: firewall_ipv6_enabled

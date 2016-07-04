@@ -1,2 +1,21 @@
 ---
 # defaults file for ansible-role-firewall
+firewall_log_dropped_packets: true
+
+# ipv4 options
+firewall_allowed_tcp_ports:
+  - "22"
+
+firewall_allowed_udp_ports: []
+
+firewall_additional_rules: []
+
+# ipv6 options
+firewall_ipv6_enabled: false
+
+firewall_allowed_tcp_ports_ipv6:
+  - "22"
+
+firewall_allowed_udp_ports_ipv6: []
+
+firewall_additional_rules_ipv6: []

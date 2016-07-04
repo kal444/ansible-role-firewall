@@ -1,0 +1,46 @@
+#!/bin/bash
+# /etc/firewall-rules.bash
+#
+
+# turn on RFC3704 Strict Reverse Path
+for i in /proc/sys/net/ipv4/conf/*/rp_filter ; do
+  echo 1 > $i
+done
+
+# Remove all rules and chains.
+iptables -F
+iptables -X
+
+# Accept traffic from loopback interface (localhost).
+iptables -A INPUT -i lo -j ACCEPT
+
+# Open ports.
+{# Add a rule for each open port #}
+{% for port in firewall_allowed_tcp_ports %}
+iptables -A INPUT -p tcp -m tcp --dport {{ port }} -j ACCEPT
+{% endfor %}
+{% for port in firewall_allowed_udp_ports %}
+iptables -A INPUT -p udp -m udp --dport {{ port }} -j ACCEPT
+{% endfor %}
+
+# Accept icmp ping requests.
+iptables -A INPUT -p icmp -j ACCEPT
+
+# Additional custom rules.
+{% for rule in firewall_additional_rules %}
+{{ rule }}
+{% endfor %}
+
+# Allow established connections:
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Log EVERYTHING (ONLY for Debug).
+# iptables -A INPUT -j LOG
+
+{% if firewall_log_dropped_packets %}
+# Log other incoming requests (all of which are dropped) at 15/minute max.
+iptables -A INPUT -m limit --limit 15/minute -j LOG --log-level 7 --log-prefix "Dropped by firewall: "
+{% endif %}
+
+# Drop all other traffic.
+iptables -A INPUT -j DROP
