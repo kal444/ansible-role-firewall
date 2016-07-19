@@ -8,6 +8,14 @@
   yum: pkg=iptables state=present
   when: ansible_os_family == 'RedHat'
 
+- name: disable ufw on Ubuntu.
+  service: name=ufw state=stopped enabled=no
+  when: ansible_distribution == 'Ubuntu'
+
+- name: disable firewalld on Redhat.
+  service: name=firewalld state=stopped enabled=no
+  when: ansible_os_family == 'RedHat'
+
 - name: Copy firewall init script into place.
   template: src=etc/init.d/firewall.j2 dest=/etc/init.d/firewall owner=root group=root mode=0755
   notify: restart firewall
