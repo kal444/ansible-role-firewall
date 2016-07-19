@@ -3,23 +3,23 @@
 #
 
 # Remove all rules and chains.
-ip6tables -F
-ip6tables -X
+ip6tables -F -w
+ip6tables -X -w
 
 # Accept traffic from loopback interface (localhost).
-ip6tables -A INPUT -i lo -j ACCEPT
+ip6tables -A INPUT -i lo -j ACCEPT -w
 
 # Open ports.
 {# Add a rule for each open port #}
 {% for port in firewall_allowed_tcp_ports_ipv6 %}
-ip6tables -A INPUT -p tcp -m tcp --dport {{ port }} -j ACCEPT
+ip6tables -A INPUT -p tcp -m tcp --dport {{ port }} -j ACCEPT -w
 {% endfor %}
 {% for port in firewall_allowed_udp_ports_ipv6 %}
-ip6tables -A INPUT -p udp -m udp --dport {{ port }} -j ACCEPT
+ip6tables -A INPUT -p udp -m udp --dport {{ port }} -j ACCEPT -w
 {% endfor %}
 
 # Accept icmp ping requests.
-ip6tables -A INPUT -p icmp -j ACCEPT
+ip6tables -A INPUT -p icmp -j ACCEPT -w
 
 # Additional custom rules.
 {% for rule in firewall_additional_rules_ipv6 %}
@@ -27,15 +27,15 @@ ip6tables -A INPUT -p icmp -j ACCEPT
 {% endfor %}
 
 # Allow established connections:
-ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT -w
 
 # Log EVERYTHING (ONLY for Debug).
-# ip6tables -A INPUT -j LOG
+# ip6tables -A INPUT -j LOG -w
 
 {% if firewall_log_dropped_packets %}
 # Log other incoming requests (all of which are dropped) at 15/minute max.
-ip6tables -A INPUT -m limit --limit 15/minute -j LOG --log-level 7 --log-prefix "Dropped by firewall: "
+ip6tables -A INPUT -m limit --limit 15/minute -j LOG --log-level 7 --log-prefix "Dropped by firewall: " -w
 {% endif %}
 
 # Drop all other traffic.
-ip6tables -A INPUT -j DROP
+ip6tables -A INPUT -j DROP -w

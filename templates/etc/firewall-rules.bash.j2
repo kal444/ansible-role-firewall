@@ -8,23 +8,23 @@ for i in /proc/sys/net/ipv4/conf/*/rp_filter ; do
 done
 
 # Remove all rules and chains.
-iptables -F
-iptables -X
+iptables -F -w
+iptables -X -w
 
 # Accept traffic from loopback interface (localhost).
-iptables -A INPUT -i lo -j ACCEPT
+iptables -A INPUT -i lo -j ACCEPT -w
 
 # Open ports.
 {# Add a rule for each open port #}
 {% for port in firewall_allowed_tcp_ports %}
-iptables -A INPUT -p tcp -m tcp --dport {{ port }} -j ACCEPT
+iptables -A INPUT -p tcp -m tcp --dport {{ port }} -j ACCEPT -w
 {% endfor %}
 {% for port in firewall_allowed_udp_ports %}
-iptables -A INPUT -p udp -m udp --dport {{ port }} -j ACCEPT
+iptables -A INPUT -p udp -m udp --dport {{ port }} -j ACCEPT -w
 {% endfor %}
 
 # Accept icmp ping requests.
-iptables -A INPUT -p icmp -j ACCEPT
+iptables -A INPUT -p icmp -j ACCEPT -w
 
 # Additional custom rules.
 {% for rule in firewall_additional_rules %}
@@ -32,15 +32,15 @@ iptables -A INPUT -p icmp -j ACCEPT
 {% endfor %}
 
 # Allow established connections:
-iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT -w
 
 # Log EVERYTHING (ONLY for Debug).
-# iptables -A INPUT -j LOG
+# iptables -A INPUT -j LOG -w
 
 {% if firewall_log_dropped_packets %}
 # Log other incoming requests (all of which are dropped) at 15/minute max.
-iptables -A INPUT -m limit --limit 15/minute -j LOG --log-level 7 --log-prefix "Dropped by firewall: "
+iptables -A INPUT -m limit --limit 15/minute -j LOG --log-level 7 --log-prefix "Dropped by firewall: " -w
 {% endif %}
 
 # Drop all other traffic.
-iptables -A INPUT -j DROP
+iptables -A INPUT -j DROP -w
