@@ -1,20 +1,36 @@
 ---
 # tasks file for ansible-role-firewall
+# debian/ubuntu
 - name: Ensure iptables is installed (Debian).
   apt: pkg=iptables state=present
   when: ansible_os_family == 'Debian'
 
+- name: check ufw package presence
+  command: dpkg-query -s ufw
+  ignore_errors: true
+  register: firewall_ufw_installed
+  when: ansible_distribution == 'Ubuntu'
+
+- name: disable ufw on Ubuntu.
+  service: name=ufw state=stopped enabled=no
+  # RC = 0 means it's found
+  when: ansible_distribution == 'Ubuntu' and firewall_ufw_installed.rc == 0
+
+# redhat
 - name: Ensure iptables is installed (RedHat).
   yum: pkg=iptables state=present
   when: ansible_os_family == 'RedHat'
 
-- name: disable ufw on Ubuntu.
-  service: name=ufw state=stopped enabled=no
-  when: ansible_distribution == 'Ubuntu'
+- name: check firewalld packge presence
+  command: rpm -q firewalld
+  ignore_errors: true
+  register: firewall_firewalld_installed
+  when: ansible_os_family == 'RedHat'
 
 - name: disable firewalld on Redhat.
   service: name=firewalld state=stopped enabled=no
-  when: ansible_os_family == 'RedHat'
+  # RC = 0 means it's found
+  when: ansible_os_family == 'RedHat' and firewall_firewalld_installed.rc == 0
 
 - name: Copy firewall init script into place.
   template: src=etc/init.d/firewall.j2 dest=/etc/init.d/firewall owner=root group=root mode=0755
