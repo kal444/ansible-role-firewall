@@ -40,6 +40,9 @@
   template: src=etc/init.d/firewall.j2 dest=/etc/init.d/firewall owner=root group=root mode=0755
   notify: restart firewall
 
+# This is a fix/workaround based on:
+# http://unix.stackexchange.com/questions/233468/how-does-systemd-use-etc-init-d-scripts
+# https://github.com/ansible/ansible-modules-core/issues/915
 - name: copy firewall systemd unit file when needed
   template: src=etc/systemd/system/firewall.service.j2 dest=/etc/systemd/system/firewall.service owner=root group=root mode=0755
   when: >
