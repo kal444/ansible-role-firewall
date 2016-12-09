@@ -5,6 +5,7 @@ After=network.target
 
 [Service]
 Type=oneshot
+RemainAfterExit=yes
 ExecStart=/etc/firewall-rules.bash
 ExecReload=/etc/firewall-rules.bash
 ExecStopPost=/sbin/iptables -F

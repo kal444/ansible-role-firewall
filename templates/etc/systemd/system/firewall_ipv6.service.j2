@@ -5,6 +5,7 @@ After=network.target
 
 [Service]
 Type=oneshot
+RemainAfterExit=yes
 ExecStart=/etc/firewall_ipv6-rules.bash
 ExecReload=/etc/firewall_ipv6-rules.bash
 ExecStopPost=/sbin/ip6tables -F
