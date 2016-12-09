@@ -1,0 +1,13 @@
+[Unit]
+Description=Firewall configuration for IPv4
+After=syslog.target
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/etc/firewall-rules.bash
+ExecReload=/etc/firewall-rules.bash
+ExecStopPost=iptables -F
+
+[Install]
+WantedBy=multi-user.target

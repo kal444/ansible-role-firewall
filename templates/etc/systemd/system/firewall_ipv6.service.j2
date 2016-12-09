@@ -1,0 +1,13 @@
+[Unit]
+Description=Firewall configuration for IPv6
+After=syslog.target
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/etc/firewall_ipv6-rules.bash
+ExecReload=/etc/firewall_ipv6-rules.bash
+ExecStopPost=ip6tables -F
+
+[Install]
+WantedBy=multi-user.target

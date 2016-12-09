@@ -32,26 +32,44 @@
   # RC = 0 means it's found
   when: ansible_os_family == 'RedHat' and firewall_firewalld_installed.rc == 0
 
-- name: Copy firewall init script into place.
-  template: src=etc/init.d/firewall.j2 dest=/etc/init.d/firewall owner=root group=root mode=0755
-  notify: restart firewall
-
 - name: Copy firewall rules into place.
   template: src=etc/firewall-rules.bash.j2 dest=/etc/firewall-rules.bash owner=root group=root mode=0744
   notify: restart firewall
 
+- name: Copy firewall init script into place.
+  template: src=etc/init.d/firewall.j2 dest=/etc/init.d/firewall owner=root group=root mode=0755
+  notify: restart firewall
+
+- name: copy firewall systemd unit file when needed
+  template: src=etc/systemd/system/firewall.service.j2 dest=/etc/systemd/system/firewall.service owner=root group=root mode=0755
+  when: >
+    (ansible_distribution == 'Ubuntu' and ansible_distribution_version.split(".")[0]|int >= 16) or
+    (ansible_distribution == 'Debian' and ansible_distribution_version.split(".")[0]|int >= 8) or
+    (ansible_distribution == 'CentOS' and ansible_distribution_version.split(".")[0]|int >= 7) or
+    (ansible_distribution == 'Fedora')
+
 - name: Ensure the firewall is enabled and will start on boot.
   service: name=firewall state=started enabled=yes
+
+- name: Copy firewall_ipv6 rules into place.
+  template: src=etc/firewall_ipv6-rules.bash.j2 dest=/etc/firewall_ipv6-rules.bash owner=root group=root mode=0744
+  notify: restart firewall_ipv6
+  when: firewall_ipv6_enabled
 
 - name: Copy firewall_ipv6 init script into place.
   template: src=etc/init.d/firewall_ipv6.j2 dest=/etc/init.d/firewall_ipv6 owner=root group=root mode=0755
   notify: restart firewall_ipv6
   when: firewall_ipv6_enabled
 
-- name: Copy firewall_ipv6 rules into place.
-  template: src=etc/firewall_ipv6-rules.bash.j2 dest=/etc/firewall_ipv6-rules.bash owner=root group=root mode=0744
-  notify: restart firewall_ipv6
-  when: firewall_ipv6_enabled
+- name: copy firewall_ipv6 systemd unit file when needed
+  template: src=etc/systemd/system/firewall_ipv6.service.j2 dest=/etc/systemd/system/firewall_ipv6.service owner=root group=root mode=0755
+  when: >
+    (
+    (ansible_distribution == 'Ubuntu' and ansible_distribution_version.split(".")[0]|int >= 16) or
+    (ansible_distribution == 'Debian' and ansible_distribution_version.split(".")[0]|int >= 8) or
+    (ansible_distribution == 'CentOS' and ansible_distribution_version.split(".")[0]|int >= 7) or
+    (ansible_distribution == 'Fedora')
+    ) and firewall_ipv6_enabled
 
 - name: Ensure the firewall_ipv6 is enabled and will start on boot.
   service: name=firewall_ipv6 state=started enabled=yes
