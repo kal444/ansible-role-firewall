@@ -45,6 +45,7 @@
 # https://github.com/ansible/ansible-modules-core/issues/915
 - name: copy firewall systemd unit file when needed
   template: src=etc/systemd/system/firewall.service.j2 dest=/etc/systemd/system/firewall.service owner=root group=root mode=0755
+  notify: restart firewall
   when: >
     (ansible_distribution == 'Ubuntu' and ansible_distribution_version.split(".")[0]|int >= 16) or
     (ansible_distribution == 'Debian' and ansible_distribution_version.split(".")[0]|int >= 8) or
@@ -52,7 +53,7 @@
     (ansible_distribution == 'Fedora')
 
 - name: Ensure the firewall is enabled and will start on boot.
-  service: name=firewall state=started enabled=yes
+  service: name=firewall enabled=yes
 
 - name: Copy firewall_ipv6 rules into place.
   template: src=etc/firewall_ipv6-rules.bash.j2 dest=/etc/firewall_ipv6-rules.bash owner=root group=root mode=0744
@@ -66,6 +67,7 @@
 
 - name: copy firewall_ipv6 systemd unit file when needed
   template: src=etc/systemd/system/firewall_ipv6.service.j2 dest=/etc/systemd/system/firewall_ipv6.service owner=root group=root mode=0755
+  notify: restart firewall_ipv6
   when: >
     (
     (ansible_distribution == 'Ubuntu' and ansible_distribution_version.split(".")[0]|int >= 16) or
@@ -75,5 +77,5 @@
     ) and firewall_ipv6_enabled
 
 - name: Ensure the firewall_ipv6 is enabled and will start on boot.
-  service: name=firewall_ipv6 state=started enabled=yes
+  service: name=firewall_ipv6 enabled=yes
   when: firewall_ipv6_enabled
