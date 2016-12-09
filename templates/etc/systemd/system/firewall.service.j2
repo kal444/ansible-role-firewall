@@ -7,7 +7,7 @@ After=network.target
 Type=oneshot
 ExecStart=/etc/firewall-rules.bash
 ExecReload=/etc/firewall-rules.bash
-ExecStopPost=iptables -F
+ExecStopPost=/sbin/iptables -F
 
 [Install]
 WantedBy=multi-user.target
