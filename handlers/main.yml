@@ -3,5 +3,11 @@
 - name: restart firewall
   service: name=firewall state=restarted
 
+- name: restart firewall systemd
+  systemd: name=firewall state=restarted daemon_reload=yes
+
 - name: restart firewall_ipv6
   service: name=firewall_ipv6 state=restarted
+
+- name: restart firewall_ipv6 systemd
+  systemd: name=firewall_ipv6 state=restarted daemon_reload=yes
