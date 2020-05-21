@@ -1,5 +1,4 @@
 ---
-# defaults file for ansible-role-firewall
 firewall_log_dropped_packets: true
 
 # ipv4 options
